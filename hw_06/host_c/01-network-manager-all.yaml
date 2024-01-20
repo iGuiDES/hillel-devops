@@ -1,0 +1,18 @@
+# This is the network config written by 'subiquity'
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens160:
+      dhcp4: yes
+      dhcp6: no
+    ens192:
+      dhcp4: no
+      dhcp6: no
+      addresses:
+        - 192.168.100.4/24
+      routes: 
+        - to: 172.16.0.130
+          via: 192.168.100.4
+        - to: 192.168.101.128
+          via: 192.168.100.4
