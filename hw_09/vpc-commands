@@ -1,0 +1,36 @@
+# Create VPC
+aws ec2 create-vpc --cidr-block 192.168.0.0/16 --tag-specifications 'ResourceType=vpc,Tags=[{Key=Name,Value=consoleVPC}]' --instance-tenancy default
+
+# Public Subnet
+aws ec2 create-subnet --vpc-id vpc-0dd069df492141c48 --cidr-block 192.168.1.0/24 --availability-zone eu-west-1a --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=ConsolePublicSubnet}]'
+aws ec2 modify-subnet-attribute --subnet-id subnet-0cb80edc65583274f --map-public-ip-on-launch
+
+# Private Subnet
+aws ec2 create-subnet --vpc-id vpc-0dd069df492141c48 --cidr-block 192.168.2.0/24 --availability-zone eu-west-1a --tag-specifications 'ResourceType=subnet,Tags=[{Key=Name,Value=ConsolePrivateSubnet}]'
+
+# Internet Gateway
+aws ec2 create-internet-gateway --tag-specifications 'ResourceType=internet-gateway,Tags=[{Key=Name,Value=ConsoleIGW}]'
+aws ec2 attach-internet-gateway --internet-gateway-id igw-038dfa3aac3f5ecab --vpc-id vpc-0dd069df492141c48 --region eu-west-1
+
+# Public RT
+aws ec2 create-route-table --vpc-id vpc-0dd069df492141c48 --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=ConsolePublicRouteTable}]'
+aws ec2 create-route --route-table-id rtb-098479af0a37331b9 --destination-cidr-block 0.0.0.0/0 --gateway-id igw-038dfa3aac3f5ecab
+aws ec2 associate-route-table --subnet-id subnet-0cb80edc65583274f --route-table-id rtb-098479af0a37331b9
+
+# Private RT
+aws ec2 create-route-table --vpc-id vpc-0dd069df492141c48 --tag-specifications 'ResourceType=route-table,Tags=[{Key=Name,Value=ConsolePrivateRouteTable}]'
+aws ec2 associate-route-table --subnet-id subnet-0f5a75936a94cc659 --route-table-id rtb-0f2c24e3a0f8684b1
+
+# NAT
+aws ec2 allocate-address --domain vpc
+aws ec2 create-nat-gateway --subnet-id subnet-0f5a75936a94cc659 --allocation-id eipalloc-0cc8f9e908ade2cce --tag-specifications 'ResourceType=natgateway,Tags=[{Key=Name,Value=ConsoleNAT_GW}]'
+aws ec2 create-route --route-table-id rtb-0f2c24e3a0f8684b1 --destination-cidr-block 0.0.0.0/0 --nat-gateway-id nat-0db1401838522885f
+
+# Security Group
+aws ec2 create-security-group --group-name ConsolePrivateSG --description "Security Group for Private Subnet" --vpc-id vpc-0dd069df492141c48
+aws ec2 authorize-security-group-ingress --group-id sg-08c84afee810d1e10 --protocol all --source-group sg-08c84afee810d1e10
+aws ec2 authorize-security-group-egress --group-id sg-08c84afee810d1e10 --protocol all --cidr 0.0.0.0/0 # Можна і не виконувати, так як outbound буде вже мати можливість гнати трафік через 0.0.0.0/0
+
+# Security Group for Public (Allow 443 port)
+aws ec2 create-security-group --group-name PublicSG443 --description "Security Group for Public Subnet" --vpc-id vpc-0dd069df492141c48
+aws ec2 authorize-security-group-egress --group-id sg-0998f086328cd60a4 --protocol tcp --port 443 --cidr 0.0.0.0/0
