@@ -1,0 +1,13 @@
+---
+
+- hosts: mysql
+  become: yes
+
+  vars_files:
+    - vault/vault-inventory-pass.yml
+    - vault/mysql_pwd.yml
+    - vars/mysql_vars.yml
+
+  roles:
+    - name: mysql
+      tags: mysql_install

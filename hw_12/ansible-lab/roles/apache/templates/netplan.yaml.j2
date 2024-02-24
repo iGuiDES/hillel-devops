@@ -1,0 +1,20 @@
+# This is the network config written by 'subiquity'
+network:
+  version: 2
+  renderer: networkd
+  ethernets:
+    ens160:
+      dhcp4: no
+      dhcp6: no
+      addresses:
+        - {{ groups['apache'][0] }}/24
+    ens192:
+      dhcp4: no
+      dhcp6: no
+      addresses:
+        - {{ groups['apache_bridge'][0] }}/24
+      routes:
+        - to: {{ groups['nginx'][0] }}
+          via: {{ groups['apache_bridge'][0] }}
+        - to: {{ groups['mysql'][0] }}
+          via: {{ groups['apache_bridge'][0] }}

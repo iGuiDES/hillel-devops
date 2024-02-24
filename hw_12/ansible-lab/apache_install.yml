@@ -1,0 +1,13 @@
+---
+
+- hosts: apache
+  become: yes
+
+  vars_files:
+    - vault/vault-inventory-pass.yml
+    - vault/mysql_pwd.yml
+    - vars/apache_vars.yml
+
+  roles:
+    - name: apache
+      tags: apache_install

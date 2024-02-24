@@ -1,0 +1,81 @@
+---
+
+- name: Update cache
+  apt:
+    update_cache: yes
+
+- name: Install dependencies and MySQL Server
+  become: yes
+  apt:
+    name: "{{ item }}"
+    update_cache: true
+    state: present
+  with_items:
+    - net-tools
+    - traceroute
+    - mysql-server
+    - python3-mysqldb
+
+- name: Start MySQL Server service
+  service:
+    name: mysql
+    state: started
+    enabled: true
+
+- name: Change root pass
+  mysql_user:
+    login_user: root
+    login_password: ""
+    user: root
+    password: "{{ mysql_root_pass }}"
+  ignore_errors: yes
+
+- name: Create DB for Wordpress
+  mysql_db:
+    login_user: root
+    login_password: "{{ mysql_root_pass }}"
+    name: "{{ mysql_db }}"
+    state: present
+
+- name: Create user DB for Wordpress
+  mysql_user:
+    login_user: root
+    login_password: "{{ mysql_root_pass }}"
+    name: "{{ mysql_user }}"
+    host: "{{ groups['apache_bridge'][0] }}"
+    password: "{{ mysql_user_pass }}"
+    priv: '{{ mysql_db }}.*:ALL'
+    state: present
+
+- name: Add my.cnf configuration
+  template:
+    src: templates/my.cnf.j2
+    dest: /etc/my.cnf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Update default configuration mysqld.cnf
+  template:
+    src: templates/mysqld.cnf.j2
+    dest: /etc/mysql/mysql.conf.d/mysqld.cnf
+
+- name: Update hosts file
+  template:
+    src: templates/hosts.j2
+    dest: /etc/hosts
+
+- name: Restart service MYSQL
+  service:
+    name: mysql
+    state: restarted
+
+- name: Add new netplan
+  template:
+    src: templates/netplan.yaml.j2
+    dest: /etc/netplan/00-installer-config.yaml
+
+- name: Apply netplan
+  shell: sudo netplan apply
+  args:
+    executable: /bin/bash

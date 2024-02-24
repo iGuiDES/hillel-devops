@@ -1,0 +1,48 @@
+---
+
+- name: Install dependencies and Nginx Web Server
+  become: true
+  apt:
+    name: "{{ item }}"
+    state: latest
+    update_cache: true
+  with_items:
+    - curl
+    - net-tools
+    - openssl
+    - nginx
+
+- name: Stopped Nginx
+  service:
+    name: nginx
+    state: stopped
+
+- name: Add new configuration for Nginx
+  template:
+    src: templates/nginx.conf.j2
+    dest: /etc/nginx/nginx.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Update hosts file
+  template:
+    src: templates/hosts.j2
+    dest: /etc/hosts
+
+- name: Start service nginx
+  service:
+    name: nginx
+    state: started
+    enabled: true
+
+- name: Add new netplan
+  template:
+    src: templates/netplan.yaml.j2
+    dest: /etc/netplan/00-installer-config.yaml
+
+- name: Apply netplan
+  shell: sudo netplan apply
+  args:
+    executable: /bin/bash
+

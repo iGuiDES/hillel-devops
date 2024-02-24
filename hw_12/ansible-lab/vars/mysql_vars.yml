@@ -1,0 +1,5 @@
+---
+
+mysql_port: 33060
+mysql_socket: /var/run/mysqld/mysqld.sock
+mysql_data_dir: /var/lib/mysql

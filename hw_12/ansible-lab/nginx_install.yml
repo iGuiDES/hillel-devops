@@ -1,0 +1,12 @@
+---
+
+- hosts: nginx
+  become: yes
+
+  vars_files:
+    - vault/vault-inventory-pass.yml
+    - vars/nginx_vars.yml
+
+  roles:
+    - name: nginx
+      tags: nginx_install

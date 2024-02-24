@@ -1,0 +1,92 @@
+---
+
+- name: Install dependencies and Apache
+  become: true
+  apt:
+    name: "{{ item }}"
+    state: present
+    update_cache: yes
+  with_items:
+    - curl
+    - net-tools
+    - traceroute
+    - openssl
+    - unzip
+    - apache2
+    - mysql-client
+    - php
+    - libapache2-mod-php
+    - php-mysql
+
+- name: Stop service Apache
+  service:
+    name: apache2
+    state: stopped
+
+- name: Create working directory for site
+  file:
+    name: "{{ site_domain_name }}"
+    state: directory
+    mode: 0755
+
+- name: Download Wordpress template
+  become_method: sudo
+  get_url:
+    url: "{{ wp_template }}"
+    dest: /tmp/"{{ wp_archive }}"
+    validate_certs: false
+    mode: 0644
+
+- name: Unzipping wordpress template
+  become_method: sudo
+  unarchive:
+    src: /tmp/"{{ wp_archive }}"
+    dest: /tmp
+    owner: root
+    group: root
+    mode: 0755
+    remote_src: yes
+
+- name: Copy files wordpress in working directory
+  copy:
+    src: /tmp/wordpress/
+    dest: /var/www/{{ site_domain_name }}
+    force: yes
+    remote_src: yes
+    mode: 0755
+    owner: root
+    group: root
+
+- name: Copy wp-config.php file to working directory
+  template:
+    src: templates/wp-config.php.j2
+    dest: /var/www/{{ site_domain_name }}/wp-config.php
+
+- name: Update apache2 configuration
+  template:
+    src: templates/apache2.conf.j2
+    dest: /etc/apache2/apache2.conf
+    owner: root
+    group: root
+    mode: 0644
+
+- name: Update hosts file
+  template:
+    src: templates/hosts.j2
+    dest: /etc/hosts
+
+- name: Start service apache2
+  service:
+    name: apache2
+    state: started
+    enabled: true
+
+- name: Add new netplan
+  template:
+    src: templates/netplan.yaml.j2
+    dest: /etc/netplan/00-installer-config.yaml
+
+- name: Apply netplan
+  shell: sudo netplan apply
+  args:
+    executable: /bin/bash

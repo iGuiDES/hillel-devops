@@ -1,0 +1,4 @@
+[mysqld]
+bind-address = {{ groups['apache'][0] }}
+datadir = {{ mysql_data_dir }}
+socket = {{ mysql_socket }}

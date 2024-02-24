@@ -1,0 +1,6 @@
+---
+
+  wp_template: https://uk.wordpress.org/latest-uk.zip
+  wp_archive: latest-uk.zip
+  site_domain_name: web.dev.local
+  gateway_apache_server: 192.168.100.4
