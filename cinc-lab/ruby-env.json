@@ -1,0 +1,22 @@
+{
+  "omnibus path": {
+    "PATH": "/opt/cinc-workstation/bin:/home/olit/.chef/gem/ruby/3.1.0/bin:/opt/cinc-workstation/embedded/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/games:/usr/local/games:/snap/bin:/opt/cinc-workstation/gitbin",
+    "GEM_ROOT": "/opt/cinc-workstation/embedded/lib/ruby/gems/3.1.0",
+    "GEM_HOME": "/home/olit/.chef/gem/ruby/3.1.0",
+    "GEM_PATH": "/home/olit/.chef/gem/ruby/3.1.0:/opt/cinc-workstation/embedded/lib/ruby/gems/3.1.0"
+  },
+  "omnibus root": "/opt/cinc-workstation",
+  "ruby info": {
+    "Executable": "/opt/cinc-workstation/embedded/bin/ruby",
+    "Version": "3.1.2",
+    "RubyGems": {
+      "RubyGems Version": "3.3.7",
+      "RubyGems Platforms": [
+        "ruby",
+        "x86_64-linux"
+      ]
+    }
+  },
+  "build_version": "24.2.1058",
+  "chef-cli": "5.6.14"
+}
